@@ -1,0 +1,21 @@
+body {
+  font-family: system-ui, sans-serif;
+  padding: 20px;
+  background: #1e1e2e;
+  color: #e0e0e0;
+}
+
+textarea {
+  font-family: Consolas, monospace;
+  background: #2a2a3c;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  padding: 10px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 8px 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
