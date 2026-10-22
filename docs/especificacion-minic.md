@@ -132,9 +132,12 @@ primario        → NUM_ENTERO | NUM_REAL | CARACTER | CADENA
 | Expresión incompleta | `x = 5 + ;` |
 | Token inesperado | `int = 5;` |
 
-**Recuperación de errores (modo pánico):** al encontrar un error, el parser lo
-registra y descarta tokens hasta llegar a un `;` o `}`. Desde ahí sigue analizando,
-y así puede reportar **varios errores** en una sola compilación.
+**Recuperación de errores:**
+- *Nivel de frase:* si falta un `)`, o un `;` al final de una línea, el parser
+  registra el error y continúa como si el símbolo estuviera presente.
+- *Modo pánico:* en cualquier otro error, el parser descarta tokens hasta un
+  punto seguro (`;`, `{`, `}` o una palabra que inicia sentencia) y continúa.
+Esto permite reportar **varios errores** en una sola compilación.
 
 ---
 
