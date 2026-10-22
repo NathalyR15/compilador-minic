@@ -1,7 +1,10 @@
 /**
  * app.js
  * Lógica del frontend: envía el código del editor al servidor
- * y muestra la respuesta.
+ * y muestra el resultado de la compilación.
+ * (Versión temporal en texto; la interfaz final se hace en el Paso 6)
+ *
+ * @author Nathaly
  */
 
 const editor = document.getElementById('editor');
@@ -17,7 +20,31 @@ btnCompilar.addEventListener('click', async () => {
     });
 
     const datos = await respuesta.json();
-    salida.textContent = JSON.stringify(datos, null, 2);
+
+    if (datos.error) {
+      salida.textContent = datos.error;
+      return;
+    }
+
+    let texto = datos.exito
+      ? 'Compilación exitosa\n'
+      : `Compilación con ${datos.totalErrores} error(es)\n`;
+
+    // Tabla de errores
+    datos.errores.forEach((e) => {
+      texto += `\n[${e.tipo}] Fila ${e.fila}, Col ${e.columna}: ${e.descripcion}\n    → ${e.sentencia}\n`;
+    });
+
+    // Árbol sintáctico
+    texto += '\n══════ ÁRBOL SINTÁCTICO ══════\n' + datos.arbolTexto + '\n';
+
+    // Tokens
+    texto += `\n══════ TOKENS (${datos.tokens.length}) ══════\n`;
+    texto += datos.tokens
+      .map((t) => `${String(t.fila).padStart(3)}:${String(t.columna).padEnd(4)} ${t.tipo.padEnd(18)} ${t.lexema}`)
+      .join('\n');
+
+    salida.textContent = texto;
   } catch (error) {
     salida.textContent = 'Error al conectar con el servidor: ' + error.message;
   }

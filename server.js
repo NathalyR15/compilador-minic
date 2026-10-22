@@ -10,7 +10,7 @@
 
 const express = require('express');
 const path = require('path');
-const { analizarLexico } = require('./src/compiler/lexer');
+const { compilar } = require('./src/compiler/compilador');
 
 const app = express();
 const PORT = 3000;
@@ -23,9 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /**
  * POST /api/compile
- * Body esperado: { "codigo": "int x = 5;" }
- * Fase actual: solo análisis léxico.
- * En los siguientes pasos se agregan el parser y el análisis semántico.
+ * Body esperado: { "codigo": "int main() { return 0; }" }
  */
 app.post('/api/compile', (req, res) => {
   const { codigo } = req.body;
@@ -34,15 +32,13 @@ app.post('/api/compile', (req, res) => {
     return res.status(400).json({ error: 'Se esperaba el campo "codigo" como texto.' });
   }
 
-  // Fase 1: análisis léxico
-  const { tokens, errores } = analizarLexico(codigo);
-
-  res.json({
-    exito: errores.length === 0,
-    totalErrores: errores.length,
-    errores,
-    tokens
-  });
+  try {
+    res.json(compilar(codigo));
+  } catch (error) {
+    // Error inesperado del compilador (bug), no del código del usuario
+    console.error(error);
+    res.status(500).json({ error: 'Error interno del compilador: ' + error.message });
+  }
 });
 
 app.listen(PORT, () => {
