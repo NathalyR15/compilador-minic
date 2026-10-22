@@ -35,6 +35,15 @@ btnCompilar.addEventListener('click', async () => {
       texto += `\n[${e.tipo}] Fila ${e.fila}, Col ${e.columna}: ${e.descripcion}\n    → ${e.sentencia}\n`;
     });
 
+    // Tabla de símbolos
+    texto += '\n══════ TABLA DE SÍMBOLOS ══════\n';
+    texto += 'Nombre'.padEnd(14) + 'Categoría'.padEnd(26) + 'Tipo'.padEnd(8) + 'Ámbito'.padEnd(28) + 'Fila\n';
+    texto += datos.tablaSimbolos
+      .map((s) =>
+        s.nombre.padEnd(14) + s.categoria.padEnd(26) + String(s.tipo).padEnd(8) + s.ambito.padEnd(28) + s.fila
+      )
+      .join('\n') + '\n';
+
     // Árbol sintáctico
     texto += '\n══════ ÁRBOL SINTÁCTICO ══════\n' + datos.arbolTexto + '\n';
 

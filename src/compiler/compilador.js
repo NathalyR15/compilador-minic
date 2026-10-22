@@ -4,13 +4,14 @@
  * Ejecuta las fases en orden y unifica sus resultados:
  *   1. Análisis léxico     (lexer.js)
  *   2. Análisis sintáctico (parser.js)
- *   3. Análisis semántico  (semantic.js) → Paso 5
+ *   3. Análisis semántico  (semantic.js)
  *
  * @author Nathaly
  */
 
 const { analizarLexico } = require('./lexer');
 const { analizarSintaxis, arbolATexto } = require('./parser');
+const { analizarSemantica } = require('./semantic');
 
 /**
  * Compila un programa en Mini-C.
@@ -26,8 +27,11 @@ function compilar(codigo) {
   // para reportar la mayor cantidad de errores posible)
   const sintactico = analizarSintaxis(lexico.tokens);
 
+  // Fase 3: semántico (trabaja sobre el árbol, aunque esté incompleto)
+  const semantico = analizarSemantica(sintactico.arbol);
+
   // Unificar errores: agregar la sentencia (texto de la línea) y ordenar por posición
-  const errores = [...lexico.errores, ...sintactico.errores]
+  const errores = [...lexico.errores, ...sintactico.errores, ...semantico.errores]
     .map((e) => ({
       ...e,
       sentencia: (lineas[e.fila - 1] || '').trim() || e.sentencia
@@ -40,7 +44,8 @@ function compilar(codigo) {
     errores,
     tokens: lexico.tokens.filter((t) => t.tipo !== 'EOF'),
     arbol: sintactico.arbol,
-    arbolTexto: arbolATexto(sintactico.arbol)
+    arbolTexto: arbolATexto(sintactico.arbol),
+    tablaSimbolos: semantico.tablaSimbolos
   };
 }
 
