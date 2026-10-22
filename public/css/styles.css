@@ -1,21 +1,595 @@
+/**
+ * styles.css
+ * Estilos del Compilador Mini-C.
+ *
+ * @author Nathaly
+ */
+
+/* ═══════════ Variables de diseño ═══════════ */
+:root {
+  --fondo: #0f1117;
+  --superficie: #171a23;
+  --superficie-2: #1f2330;
+  --borde: #2a2f3d;
+  --texto: #e6e8ef;
+  --texto-suave: #9aa1b2;
+  --acento: #8b5cf6;
+  --acento-2: #ec4899;
+  --exito: #22c55e;
+  --error: #ef4444;
+  --linea-arbol: #3d4456;
+  --radio: 10px;
+  --sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'Cascadia Code', Consolas, 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 body {
-  font-family: system-ui, sans-serif;
-  padding: 20px;
-  background: #1e1e2e;
-  color: #e0e0e0;
+  font-family: var(--sans);
+  background: var(--fondo);
+  color: var(--texto);
+  display: flex;
+  flex-direction: column;
 }
 
-textarea {
-  font-family: Consolas, monospace;
-  background: #2a2a3c;
-  color: #e0e0e0;
-  border: 1px solid #444;
-  padding: 10px;
+.oculto { display: none !important; }
+
+/* ═══════════ Encabezado ═══════════ */
+.barra-superior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
 }
 
-button {
-  margin-top: 10px;
-  padding: 8px 20px;
-  font-weight: bold;
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo { width: 44px; height: 44px; }
+
+.marca h1 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.marca span {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.separador {
+  width: 1px;
+  height: 24px;
+  background: var(--borde);
+}
+
+/* ═══════════ Botones ═══════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--superficie-2);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.9rem;
   cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.btn:hover { border-color: var(--acento); }
+.btn svg { width: 16px; height: 16px; }
+
+.btn-chico {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+
+.btn-compilar {
+  padding: 9px 22px;
+  border: none;
+  background: linear-gradient(135deg, var(--acento), var(--acento-2));
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.btn-compilar:hover { filter: brightness(1.1); }
+
+.btn-compilar:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+select.btn { appearance: auto; }
+
+/* ═══════════ Área de trabajo y editor ═══════════ */
+.area-trabajo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 16px 20px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.barra-archivo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  font-size: 0.85rem;
+}
+
+.nombre-archivo { font-family: var(--mono); }
+.indicador-cambios { color: var(--acento-2); }
+
+.atajos {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.contenedor-editor {
+  flex: 1;
+  position: relative;
+  min-height: 300px;
+}
+
+.contenedor-editor .CodeMirror {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+.cm-s-dracula.CodeMirror,
+.cm-s-dracula .CodeMirror-gutters {
+  background: #12141b !important;
+}
+
+.cm-s-dracula .CodeMirror-gutters { border-right: 1px solid var(--borde); }
+
+/* Líneas con error (se marcan después de compilar) */
+.linea-error { background: rgba(239, 68, 68, 0.18); }
+
+.barra-estado {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 14px;
+  background: var(--superficie);
+  border-top: 1px solid var(--borde);
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.estado-exito { color: var(--exito); }
+.estado-error { color: var(--error); }
+
+footer {
+  padding: 0 0 12px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+/* ═══════════ Modal ═══════════ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 6, 10, 0.7);
+  backdrop-filter: blur(3px);
+}
+
+.modal-contenido {
+  display: flex;
+  flex-direction: column;
+  width: min(1200px, 100%);
+  height: min(88vh, 900px);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.modal-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.resumen h2 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+}
+
+.resumen p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.btn-cerrar {
+  border: none;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.btn-cerrar:hover { color: var(--texto); }
+
+.pestanas {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--borde);
+  overflow-x: auto;
+}
+
+.pestana {
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pestana:hover { color: var(--texto); }
+
+.pestana.activa {
+  color: var(--texto);
+  border-bottom-color: var(--acento);
+}
+
+.contador {
+  margin-left: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--error);
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.modal-cuerpo {
+  flex: 1;
+  overflow: auto;
+  padding: 18px 22px;
+}
+
+.panel { display: none; }
+.panel.activo { display: block; }
+
+/* ═══════════ Insignias ═══════════ */
+.insignia {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.insignia-exito { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.insignia-error { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.insignia-lexico { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.insignia-sintactico { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.insignia-semantico { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+/* ═══════════ Tablas ═══════════ */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.tabla th {
+  position: sticky;
+  top: -18px;
+  padding: 8px 10px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto-suave);
+  font-weight: 600;
+  text-align: left;
+}
+
+.tabla td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: top;
+}
+
+.tabla code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--superficie-2);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  white-space: pre;
+}
+
+.fila-clic { cursor: pointer; }
+.fila-clic:hover { background: var(--superficie-2); }
+
+.ayuda {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.vacio {
+  padding: 48px;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.vacio strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 1.2rem;
+  color: var(--exito);
+}
+
+/* ═══════════ Panel de tokens ═══════════ */
+.subtitulo {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.expresion-lexica {
+  max-height: 280px;
+  overflow: auto;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.9;
+}
+
+.linea-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.num-linea {
+  min-width: 32px;
+  color: var(--texto-suave);
+}
+
+.tok { white-space: nowrap; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip {
+  padding: 4px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: var(--superficie-2);
+  font-size: 0.8rem;
+}
+
+/* Colores por tipo de token */
+.tok-tipo { color: #c4b5fd; }
+.tok-palabra_reservada { color: #f9a8d4; }
+.tok-identificador { color: #e5e7eb; }
+.tok-num_entero, .tok-num_real { color: #fcd34d; }
+.tok-caracter, .tok-cadena { color: #86efac; }
+.tok-op_aritmetico, .tok-op_relacional, .tok-op_logico,
+.tok-op_asignacion, .tok-op_incremento { color: #fca5a5; }
+.tok-delimitador { color: #94a3b8; }
+
+/* ═══════════ Árbol sintáctico ═══════════ */
+.arbol-herramientas {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.arbol-ayuda {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.leyenda .nodo { font-size: 0.7rem; padding: 2px 8px; }
+
+.arbol-contenedor {
+  height: 62vh;
+  overflow: auto;
+  padding: 20px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.arbol-lienzo {
+  width: max-content;
+  margin: 0 auto;
+}
+
+/* Diagrama jerárquico con listas anidadas: cada <li> es un nodo,
+   y sus <ul> internas son los hijos. Las líneas se dibujan con ::before/::after */
+.arbol,
+.arbol ul {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.arbol ul { padding-top: 20px; }
+
+.arbol li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 4px 0;
+  list-style: none;
+}
+
+/* Línea horizontal que une a los hermanos + línea vertical hacia cada hijo */
+.arbol li::before,
+.arbol li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 20px;
+  border-top: 2px solid var(--linea-arbol);
+}
+
+.arbol li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid var(--linea-arbol);
+}
+
+.arbol li:only-child::before,
+.arbol li:only-child::after { display: none; }
+
+.arbol li:only-child { padding-top: 0; }
+
+.arbol li:first-child::before,
+.arbol li:last-child::after { border: 0 none; }
+
+.arbol li:last-child::before {
+  border-right: 2px solid var(--linea-arbol);
+  border-radius: 0 6px 0 0;
+}
+
+.arbol li:first-child::after { border-radius: 6px 0 0 0; }
+
+/* Línea vertical que baja desde el padre */
+.arbol li > ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 20px;
+  border-left: 2px solid var(--linea-arbol);
+}
+
+.nodo {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid;
+  border-radius: 8px;
+  background: var(--superficie);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.nodo-tipo { font-weight: 600; }
+
+.nodo-valor {
+  margin-top: 2px;
+  font-family: var(--mono);
+  opacity: 0.9;
+}
+
+.nodo.con-hijos { cursor: pointer; }
+.nodo.con-hijos:hover { filter: brightness(1.3); }
+
+.colapsado > ul { display: none; }
+.colapsado > .nodo { border-style: dashed; }
+.colapsado > .nodo::after {
+  content: '+';
+  position: absolute;
+  bottom: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--acento);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Colores por categoría de nodo */
+.nodo-raiz { border-color: #ec4899; color: #f9a8d4; }
+.nodo-funcion { border-color: #8b5cf6; color: #c4b5fd; }
+.nodo-control { border-color: #f59e0b; color: #fcd34d; }
+.nodo-declaracion { border-color: #22c55e; color: #86efac; }
+.nodo-sentencia { border-color: #3b82f6; color: #93c5fd; }
+.nodo-operador { border-color: #ef4444; color: #fca5a5; }
+.nodo-literal { border-color: #14b8a6; color: #5eead4; }
+.nodo-identificador { border-color: #a3a3a3; color: #e5e5e5; }
+.nodo-llamada { border-color: #d946ef; color: #f0abfc; }
+.nodo-estructura { border-color: #475569; color: #cbd5e1; }
+
+/* ═══════════ Responsive ═══════════ */
+@media (max-width: 760px) {
+  .atajos, .arbol-ayuda { display: none; }
+  .area-trabajo { margin: 12px; }
+  .modal { padding: 8px; }
 }

@@ -4,18 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Compilador Mini-C</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+
+  <!-- Editor de código (CodeMirror 5, servido desde node_modules) -->
+  <link rel="stylesheet" href="/vendor/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="/vendor/codemirror/theme/dracula.css">
+
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <h1>Compilador Mini-C</h1>
-  <textarea id="editor" rows="10" cols="60">int main() {
-  int x = 5;
-  return 0;
-}</textarea>
-  <br>
-  <button id="btnCompilar">COMPILAR</button>
-  <pre id="salida"></pre>
 
-  <script src="js/app.js"></script>
+  <!-- ═══════════ Encabezado: logo, nombre y acciones ═══════════ -->
+  <header class="barra-superior">
+    <div class="marca">
+      <img src="img/logo.svg" alt="Logo Compilador Mini-C" class="logo">
+      <div>
+        <h1>Compilador Mini-C</h1>
+        <span>Analizador léxico, sintáctico y semántico</span>
+      </div>
+    </div>
+
+    <nav class="acciones">
+      <button id="btnNuevo" class="btn" title="Crear un archivo nuevo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg>
+        Nuevo
+      </button>
+      <button id="btnAbrir" class="btn" title="Abrir un archivo .mc (Ctrl+O)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Abrir
+      </button>
+      <button id="btnGuardar" class="btn" title="Guardar (Ctrl+S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        Guardar
+      </button>
+      <button id="btnGuardarComo" class="btn" title="Guardar como (Ctrl+Shift+S)">Guardar como</button>
+
+      <select id="selectEjemplos" class="btn" title="Cargar un programa de ejemplo">
+        <option value="">Ejemplos…</option>
+        <option value="valido.mc">valido.mc</option>
+        <option value="errores.mc">errores.mc</option>
+        <option value="semantico.mc">semantico.mc</option>
+        <option value="prueba.mc">prueba.mc</option>
+      </select>
+
+      <span class="separador"></span>
+
+      <button id="btnCompilar" class="btn btn-compilar" title="Compilar (Ctrl+Enter)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
+        <span id="textoCompilar">COMPILAR</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ═══════════ Área de trabajo: editor ═══════════ -->
+  <main class="area-trabajo">
+    <div class="barra-archivo">
+      <span id="nombreArchivo" class="nombre-archivo">sin_titulo.mc</span>
+      <span id="indicadorCambios" class="indicador-cambios oculto" title="Cambios sin guardar">●</span>
+      <span class="atajos">Ctrl+O abrir · Ctrl+S guardar · Ctrl+Enter compilar</span>
+    </div>
+
+    <div class="contenedor-editor">
+      <textarea id="editor"></textarea>
+    </div>
+
+    <div class="barra-estado">
+      <span id="estado">Listo</span>
+      <span id="posicionCursor">Ln 1, Col 1</span>
+    </div>
+  </main>
+
+  <footer>Proyecto Final de Compiladores · Desarrollado por Nathaly · 2026</footer>
+
+  <!-- Selector de archivos (respaldo para navegadores sin File System Access API) -->
+  <input type="file" id="inputArchivo" accept=".mc" hidden>
+
+  <!-- ═══════════ Modal de resultados de compilación ═══════════ -->
+  <div id="modal" class="modal oculto" role="dialog" aria-modal="true" aria-labelledby="resumen">
+    <div class="modal-contenido">
+      <div class="modal-encabezado">
+        <div id="resumen" class="resumen"></div>
+        <button id="cerrarModal" class="btn-cerrar" title="Cerrar (Esc)">✕</button>
+      </div>
+
+      <div class="pestanas">
+        <button class="pestana activa" data-panel="panelErrores">
+          Errores <span id="contErrores" class="contador oculto"></span>
+        </button>
+        <button class="pestana" data-panel="panelTokens">Análisis léxico</button>
+        <button class="pestana" data-panel="panelArbol">Árbol sintáctico</button>
+        <button class="pestana" data-panel="panelSimbolos">Tabla de símbolos</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <section id="panelErrores" class="panel activo"></section>
+        <section id="panelTokens" class="panel"></section>
+        <section id="panelArbol" class="panel"></section>
+        <section id="panelSimbolos" class="panel"></section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/vendor/codemirror/lib/codemirror.js"></script>
+  <script src="/vendor/codemirror/mode/clike/clike.js"></script>
+  <script src="/vendor/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="/vendor/codemirror/addon/edit/closebrackets.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

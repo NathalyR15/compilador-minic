@@ -8,10 +8,16 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["compilador", "lexer", "parser", "mini-c"],
+  "keywords": [
+    "compilador",
+    "lexer",
+    "parser",
+    "mini-c"
+  ],
   "author": "Heather",
   "license": "ISC",
   "dependencies": {
+    "codemirror": "^5.65.21",
     "express": "^5.1.0"
   },
   "devDependencies": {

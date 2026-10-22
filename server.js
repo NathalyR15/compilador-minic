@@ -2,8 +2,9 @@
  * server.js
  * Servidor principal del Compilador Mini-C.
  * - Sirve el frontend (carpeta /public).
+ * - Sirve la librería del editor (CodeMirror) y los programas de ejemplo.
  * - Expone la API /api/compile que recibe código fuente y devuelve
- *   el resultado de la compilación (tokens, árbol y errores).
+ *   el resultado de la compilación (tokens, árbol, símbolos y errores).
  *
  * @author Nathaly
  */
@@ -18,8 +19,19 @@ const PORT = 3000;
 // Permite recibir JSON en el body de las peticiones (límite de 1 MB)
 app.use(express.json({ limit: '1mb' }));
 
-// Sirve los archivos estáticos del frontend
+// Frontend
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Librería del editor (instalada con npm, funciona sin internet)
+app.use('/vendor/codemirror', express.static(path.join(__dirname, 'node_modules', 'codemirror')));
+
+// Programas de ejemplo .mc (se envían como texto plano)
+app.use(
+  '/ejemplos',
+  express.static(path.join(__dirname, 'ejemplos'), {
+    setHeaders: (res) => res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  })
+);
 
 /**
  * POST /api/compile
